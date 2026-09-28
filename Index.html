@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kids Tube Santiago - OS System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;800;900&display=swap');
+
+        :root {
+            --bg-dark: #1b1c20;
+            --panel-bg: #22242a;
+            --card-bg: #22242a;
+            --card-shadow-out: 8px 8px 16px #151619, -8px -8px 16px #2f323b;
+            --card-shadow-in: inset 3px 3px 6px #151619, inset -3px -3px 6px #2f323b;
+            --neon-cyan: #00FF0D;
+            --neon-red: #FF0000;
+            --text-primary: #e0e6ed;
+            --text-secondary: #7e8b9b;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent !important;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+            padding: 16px 12px 30px 12px;
+            color: var(--text-primary);
+            transition: filter 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* --- SPLASH SCREEN NEUMÓRFICO --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-dark);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s ease;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            margin-top: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .splash-subtitle {
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            letter-spacing: 5px;
+            margin-top: 6px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .splash-loader-bar {
+            width: 220px;
+            height: 18px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow-in);
+            overflow: hidden;
+            position: relative;
+            padding: 3px 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .splash-loader-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 12px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--neon-cyan) 0px,
+                var(--neon-cyan) 7px,
+                transparent 7px,
+                transparent 10px
+            );
+            box-shadow: 0 0 10px rgba(0, 255, 13, 0.5);
+            animation: fillProgress 10s linear forwards;
+        }
+
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .splash-status {
+            margin-top: 14px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        /* --- MODAL DE INFORMACIÓN / AVISO --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 16, 20, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 380px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 13, 0.2);
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-img-container {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow-in);
+            padding: 4px;
+            margin-bottom: 14px;
+            background: #000;
+        }
+
+        .modal-img-container img {
+            width: 100%;
+            max-height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .modal-text {
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+
+        .modal-text span.warning {
+            color: #FFCC00;
+            font-weight: 700;
+            display: block;
+            margin: 6px 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            justify-content: space-between;
+            margin-top: 4px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 10px 4px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-btn:active {
+            box-shadow: var(--card-shadow-in);
+            transform: scale(0.96);
+        }
+
+        .modal-btn.cyan { color: var(--neon-cyan); }
+
+        /* --- HEADER CONTROL PANEL --- */
+        header {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            padding: 10px 14px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1000px;
+            margin: 0 auto 24px auto;
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            gap: 10px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-in);
+            padding: 4px;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        h1 span.tube { color: var(--neon-cyan); }
+        h1 span.santiago {
+            color: var(--neon-cyan);
+            font-size: 0.65rem;
+            margin-left: 4px;
+            padding: 2px 6px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-in);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* --- WIDGET DE BATERÍA ESTILO NEUMÓRFICO --- */
+        .battery-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-in);
+            gap: 2px;
+        }
+
+        .battery-label-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.62rem;
+            color: var(--text-secondary);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+        }
+
+        .battery-percentage {
+            color: var(--neon-cyan);
+            font-weight: 800;
+        }
+
+        .battery-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .lightning-icon {
+            width: 10px;
+            height: 10px;
+            fill: var(--neon-cyan);
+            filter: drop-shadow(0 0 3px var(--neon-cyan));
+        }
+
+        .battery-blocks-container {
+            width: 65px;
+            height: 12px;
+            background: #151619;
+            border-radius: 6px;
+            padding: 2px;
+            box-shadow: inset 1px 1px 3px #0d0e10, inset -1px -1px 3px #23262d;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .battery-blocks-fill {
+            height: 100%;
+            width: 68%;
+            border-radius: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--neon-cyan) 0px,
+                var(--neon-cyan) 4px,
+                transparent 4px,
+                transparent 6px
+            );
+            box-shadow: 0 0 6px rgba(0, 255, 13, 0.7);
+            transition: width 0.4s ease;
+        }
+
+        .btn-back {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            border-radius: 12px;
+            padding: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .btn-back img {
+            height: 30px;
+            width: auto;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 0 2px var(--neon-cyan));
+        }
+
+        .btn-back:active { 
+            box-shadow: var(--card-shadow-in);
+            transform: scale(0.95); 
+        }
+
+        .btn-back.visible { display: inline-flex; }
+
+        /* --- CARDS SYSTEM --- */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .container.single-column {
+            grid-template-columns: 1fr;
+            max-width: 480px;
+            margin: 20px auto 0 auto;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            border-radius: 24px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            scroll-margin-top: 90px;
+            /* Borde verde neón tenue para coincidir con la ventana emergente */
+            border: 1px solid rgba(0, 255, 13, 0.2);
+        }
+
+        .video-wrapper {
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: var(--card-shadow-in);
+            padding: 4px;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            aspect-ratio: 9/16;
+            object-fit: cover;
+            border-radius: 14px;
+            display: block;
+            accent-color: #FF0000 !important;
+        }
+
+        /* --- CONTROLES HTML5 EN ROJO --- */
+        video::-webkit-media-controls-panel {
+            background: linear-gradient(transparent, rgba(0,0,0,0.8)) !important;
+        }
+
+        video::-webkit-media-controls-play-button,
+        video::-webkit-media-controls-overlay-play-button {
+            filter: drop-shadow(0px 0px 6px #FF0000) sepia(100%) saturate(10000%) hue-rotate(330deg) !important;
+        }
+
+        video::-webkit-media-controls-timeline {
+            accent-color: #FF0000 !important;
+            filter: drop-shadow(0px 0px 3px #FF0000) !important;
+        }
+
+        video::-webkit-media-controls-timeline-container {
+            accent-color: #FF0000 !important;
+        }
+
+        video::-webkit-media-controls-current-time-display,
+        video::-webkit-media-controls-time-remaining-display,
+        video::-webkit-media-controls-mute-button,
+        video::-webkit-media-controls-toggle-closed-captions-button,
+        video::-webkit-media-controls-fullscreen-button,
+        video::-internal-media-controls-overflow-button,
+        video::-webkit-media-controls-overflow-menu-list,
+        video::-webkit-media-controls-overflow-button {
+            filter: drop-shadow(0px 0px 4px #FF0000) sepia(100%) saturate(10000%) hue-rotate(330deg) !important;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin: 14px 0 10px 0;
+            color: var(--text-primary);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-in);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .led-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-online { color: var(--neon-cyan); }
+        .status-online .led-dot { background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan); }
+
+        .status-offline { color: #00FF0D; }
+        .status-offline .led-dot { background: #00FF0D; box-shadow: 0 0 8px #00FF0D; }
+
+        .status-loading { color: var(--neon-cyan); }
+        .status-loading .led-dot { background: var(--neon-cyan); animation: blink 0.8s infinite; }
+
+        @keyframes blink { 50% { opacity: 0.2; } }
+
+        .btn-neu {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow-out);
+            transition: all 0.2s ease;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            min-height: 52px;
+        }
+
+        .btn-neu img {
+            max-height: 32px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px var(--neon-cyan));
+        }
+
+        .btn-neu:active { 
+            box-shadow: var(--card-shadow-in); 
+            transform: scale(0.98);
+        }
+        .btn-neu:disabled { opacity: 1; cursor: not-allowed; box-shadow: var(--card-shadow-in); }
+
+        /* --- BARRA DE DESCARGA VISUAL (SIN TEXTO) --- */
+        .btn-download-bar-container {
+            width: 80%;
+            height: 16px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow-in);
+            overflow: hidden;
+            padding: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-download-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 12px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--neon-cyan) 0px,
+                var(--neon-cyan) 6px,
+                transparent 6px,
+                transparent 9px
+            );
+            box-shadow: 0 0 8px rgba(0, 255, 13, 0.6);
+            transition: width 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SPLASH SCREEN DE 10 SEGUNDOS -->
+    <div id="splash-screen">
+        <div class="splash-title">KIDS TUBE <span style="color: var(--neon-cyan);">SANTIAGO</span></div>
+        <div class="splash-subtitle">SYSTEM OS V2.5</div>
+        <div class="splash-loader-bar">
+            <div class="splash-loader-fill"></div>
+        </div>
+        <div class="splash-status" id="splash-status-text">Iniciando interfaz cuántica...</div>
+    </div>
+
+    <!-- MODAL POP-UP DE AVISO -->
+    <div class="modal-overlay" id="welcome-modal">
+        <div class="modal-box">
+            <div class="modal-img-container">
+                <img id="modal-banner" src="" alt="Banner Kids Tube Santiago">
+            </div>
+            <div class="modal-title">Kids Tube Santiago</div>
+            <div class="modal-text">
+                Bienvenido al sistema interactivo de entretenimiento.
+                <span class="warning">⚠️ ¡ATENCIÓN! Esta aplicación es totalmente GRATUITA.</span>
+                Queda estrictamente prohibida su venta.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="closeModal()">LUEGO</button>
+                <a class="modal-btn cyan" href="https://chat.whatsapp.com" target="_blank">WHATSAPP</a>
+                <a class="modal-btn cyan" href="https://t.me" target="_blank">TELEGRAM</a>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <img id="app-logo" src="" alt="Logo" draggable="false">
+            </div>
+            <h1>Kids<span class="tube">Tube</span> <span class="santiago">Santiago</span></h1>
+        </div>
+
+        <div class="battery-widget">
+            <div class="battery-label-row">
+                <span>Electricity:</span>
+                <span class="battery-percentage" id="battery-text">68%</span>
+            </div>
+            <div class="battery-bar-row">
+                <svg class="lightning-icon" viewBox="0 0 24 24">
+                    <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                </svg>
+                <div class="battery-blocks-container">
+                    <div class="battery-blocks-fill" id="battery-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-back" id="btn-back" onclick="resetLayout()">
+            <img id="img-btn-back" src="" alt="Volver" draggable="false">
+        </button>
+    </header>
+
+    <div class="container" id="video-list"></div>
+
+    <script>
+        function closeModal() {
+            document.getElementById("welcome-modal").classList.remove("active");
+        }
+
+        function initBatteryMonitor() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    const updateBatteryUI = () => {
+                        const level = Math.round(battery.level * 100);
+                        document.getElementById('battery-text').innerText = level + '%';
+                        document.getElementById('battery-fill').style.width = level + '%';
+                    };
+                    updateBatteryUI();
+                    battery.addEventListener('levelchange', updateBatteryUI);
+                });
+            }
+        }
+        initBatteryMonitor();
+
+        const splashMessages = [
+            "Estableciendo enlace seguro...",
+            "Inicializando base de datos local...",
+            "Sincronizando nodos multimedia...",
+            "Compilando interfaz de control HUD...",
+            "Optimizando flujo de datos...",
+            "Sistema Neo Tube Operativo."
+        ];
+
+        let msgIdx = 0;
+        const statusText = document.getElementById("splash-status-text");
+        const msgInterval = setInterval(() => {
+            if (msgIdx < splashMessages.length) {
+                statusText.innerText = splashMessages[msgIdx];
+                msgIdx++;
+            }
+        }, 1600);
+
+        setTimeout(() => {
+            clearInterval(msgInterval);
+            document.getElementById("splash-screen").classList.add("hidden");
+            document.getElementById("welcome-modal").classList.add("active");
+        }, 10000);
+
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'PrintScreen' || e.keyCode === 44 || e.keyCode === 123 || 
+               (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || 
+               (e.ctrlKey && ['U', 'P'].includes(e.key.toUpperCase()))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        window.addEventListener('blur', () => { document.body.style.filter = 'blur(25px)'; });
+        window.addEventListener('focus', () => { document.body.style.filter = 'none'; });
+
+        const LOGO_URL = "https://dl.dropboxusercontent.com/scl/fi/63x8iyp2ilhhidufxudtq/Orange-and-Black-Modern-Professional-Electrician-Services-Instagram-Post_20260907_234742_0000.png?rlkey=5jh874gpqqt1u26f3sdostnqa&st=0mreg1lc&dl=1";
+        const BACK_IMG_URL = "https://dl.dropboxusercontent.com/scl/fi/to8uu9wehmvk22d9kwf8m/20260913_225429_0000.png?rlkey=unmcbysh86xhstsalk1p2nslt&st=c4xog1rs&dl=1";
+        const SAVE_IMG_URL = "https://dl.dropboxusercontent.com/scl/fi/9fvzn8udo7amdy26ckt7l/20260914_071132_0000.png?rlkey=ufa6tjnt1v7tqmk7ig12fwuev&st=8f0olr0f&dl=1";
+
+        function getDirectDropboxUrl(url) {
+            if (!url) return "";
+            let directUrl = url.trim();
+            directUrl = directUrl.replace("www.dropbox.com", "dl.dropboxusercontent.com");
+            directUrl = directUrl.replace("dropbox.com", "dl.dropboxusercontent.com");
+            
+            if (directUrl.includes("dl=0")) {
+                directUrl = directUrl.replace("dl=0", "raw=1");
+            } else if (!directUrl.includes("raw=1")) {
+                directUrl = directUrl.replace("dl=1", "raw=1");
+                if (!directUrl.includes("raw=1")) {
+                    directUrl += (directUrl.includes("?") ? "&" : "?") + "raw=1";
+                }
+            }
+            return directUrl;
+        }
+
+        const rawUrls = [
+            "https://dl.dropboxusercontent.com/scl/fi/h15ofg5bokmedcbszdn9r/AllVideo_01788809695611.mp4?rlkey=2deddn9u2gs2zgasn66c389ew&st=3ydfmhms&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/wfx31x9fusn7a18y7fdmp/AllVideo_01788810426795.mp4?rlkey=47tvovbmoo8s1nwtyraa5eyrf&st=9p27biht&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/p08bd4dzy9x9raf6m7tc5/AllVideo_01788810354272.mp4?rlkey=et7yv83c9uk9o3s2uwumyyiip&st=evgxbm1q&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/oenv1lben4godll95yqn5/AllVideo_01788824389637.mp4?rlkey=wib7j10eqfnh56qmvaa7b0m92&st=22gh1bnq&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/jzk9v69kjl8tbz6afcn5c/AllVideo_01788824722011.mp4?rlkey=8z0lo7ob1sp8voqnlwygrmgfx&st=gbaz96rw&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/zxklp9zkqjvbxy7c81jmv/AllVideo_01788824884610.mp4?rlkey=p8s4oc3ieo1ow6s3rlonywya4&st=vq53u6y7&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/rij0mi6807ujt5uimw2tx/AllVideo_01788825407294.mp4?rlkey=f9plu1ldk8ii322yxsjbwuqji&st=13wul15o&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/v8if0ckon2cvgegrhv9w4/AllVideo_01788825486146.mp4?rlkey=xyfao2tpvha8y17kajhrc7rpt&st=bf92twlt&dl=1",
+            "https://dl.dropboxusercontent.com/scl/fi/6h6ch5kspuyuvun5bpfzh/AllVideo_01788825457377.mp4?rlkey=abnnbbs31th72vlc3502lnxo7&st=41s4z2w1&dl=1",
+            "https://www.dropbox.com/scl/fi/18003x5a17kvqj6j0fpzo/AllVideo_01788837040913.mp4?rlkey=hj517dwba01apcpix172m3n3m&st=5wkuod7g&dl=1",
+            "https://www.dropbox.com/scl/fi/y29wq150uvps3764or80n/AllVideo_01788836998536.mp4?rlkey=bya26i94sia8gs4lejw81bjn0&st=59ypyy7m&dl=1",
+            "https://www.dropbox.com/scl/fi/tpza1kj7i1wsku1n0t9d2/AllVideo_01788836957875.mp4?rlkey=25chicv3hh47zy65kxkgq8ht2&st=huszthy7&dl=1",
+            "https://www.dropbox.com/scl/fi/raj76ubqjalf0sremturn/AllVideo_01788836894727.mp4?rlkey=ix1d45jr581cqigl4ancghm9k&st=uodtwit9&dl=1",
+            "https://www.dropbox.com/scl/fi/wt1m4kdiu2njay9d2tanq/AllVideo_01788836837548.mp4?rlkey=eqo9fgtzu5y3cbblfvfjoksqg&st=z4mwmgx1&dl=1",
+            "https://www.dropbox.com/scl/fi/3s99f8cjl3ts9yd9wwush/AllVideo_01788836792108.mp4?rlkey=ygiq5i5kzduls2rjn7kolob35&st=u3fdbpko&dl=1",
+            "https://www.dropbox.com/scl/fi/1kas91crohpkkdof40o0p/AllVideo_01788836718979.mp4?rlkey=6ezvunztdvhq3mzieohfj3vn7&st=pe8ny8cj&dl=1",
+            "https://www.dropbox.com/scl/fi/rvvgsduhdpaugvwl5q44r/AllVideo_01788836675089.mp4?rlkey=n15pnrlz2fadmeq6p0rcwyvdo&st=nf4jrepu&dl=1",
+            "https://www.dropbox.com/scl/fi/vq4abi2fmxv0pmtx204pt/AllVideo_01788836626464.mp4?rlkey=50nycz0qigk0z14w5mt98h64w&st=mev8l4xw&dl=1",
+            "https://www.dropbox.com/scl/fi/d4ipzpdghoneo0o5i3fzc/AllVideo_01788836577435.mp4?rlkey=jma8j7arvz3nu1mpnsze5ujd3&st=o17salpn&dl=1",
+            "https://www.dropbox.com/scl/fi/adupr0xwqf5juor2g91f7/AllVideo_01788836530925.mp4?rlkey=86mjnyq3b6phu6vu6vx4pevsc&st=ua1dv5vg&dl=1",
+            "https://www.dropbox.com/scl/fi/c4ckpd55g1c54tndnso5v/AllVideo_01788836487821.mp4?rlkey=ksbq5hs4r0v8jncbbkd2368op&st=vd1mqrxk&dl=1",
+            "https://www.dropbox.com/scl/fi/1qhy4ff7ukvkvx7zsz2yi/AllVideo_01788836451267.mp4?rlkey=tvd8xe994g6ocwf6wfkz2cg9h&st=cpfl3tl1&dl=1",
+            "https://www.dropbox.com/scl/fi/w34xqngdgzvpdget8huua/AllVideo_01788836424700.mp4?rlkey=37x34oj8h1e0ynrglxm852gq3&st=sth2yb2x&dl=1",
+            "https://www.dropbox.com/scl/fi/68gqp0qea20zo9r2fd0md/AllVideo_01788836370180.mp4?rlkey=2tmux6le6skvbit3t4iqr6zfn&st=nz6hvo5c&dl=1",
+            "https://www.dropbox.com/scl/fi/1riy5ab4ef2ww2s80qlby/AllVideo_01788836332239.mp4?rlkey=xxqat1vubjixy8stb7gjb37z9&st=cp5j7mgy&dl=1",
+            "https://www.dropbox.com/scl/fi/q9pgnh5nnwvn12hbh3gvf/AllVideo_01788836267180.mp4?rlkey=3dcx7roh9loq8njn9hjy8506a&st=v9jg7613&dl=1",
+            "https://www.dropbox.com/scl/fi/gwg15weojd47pzxq089e3/AllVideo_01788836236594.mp4?rlkey=cu8836ie8kumzx03obbbnj40o&st=ilu8k6aa&dl=1",
+            "https://www.dropbox.com/scl/fi/ietatcmz5wf1xtdkr8hsd/AllVideo_01788836154933.mp4?rlkey=jx6lyky8golt4qisaixn3z81u&st=wqb5e9p7&dl=1",
+            "https://www.dropbox.com/scl/fi/yptaaq453xals0fl9sl9p/AllVideo_01788836194227.mp4?rlkey=lzi2phv52720r2hzl6dtcnien&st=nfce9gx8&dl=1",
+            "https://www.dropbox.com/scl/fi/byfq9enins4vtwy4c5biw/AllVideo_01788836115668.mp4?rlkey=dclhnmgxr9y5oz5mygjg3eghp&st=p6j33epq&dl=1",
+            "https://www.dropbox.com/scl/fi/2junnl95mh3cfp9h218e6/AllVideo_01788836066553.mp4?rlkey=otslaeb6ckyto2dkk171er3x4&st=hr2ktqll&dl=1",
+            "https://www.dropbox.com/scl/fi/jr3pf1ecevhl1fqwu6zcv/AllVideo_01788835949259.mp4?rlkey=sqzqqq6xwsnpiljrurbm44e99&st=whpt9hkd&dl=1",
+            "https://www.dropbox.com/scl/fi/wojliwqewf9a5irozwk7j/AllVideo_01788835993350.mp4?rlkey=d8yhjues5jt1wujph588jyfc7&st=y0jc5h9t&dl=1",
+            "https://www.dropbox.com/scl/fi/x498p32ccx77qw1m0k8vi/AllVideo_01788835808454.mp4?rlkey=33dz0gyr6ga1bfsjmee3xhub8&st=13663rer&dl=1",
+            "https://www.dropbox.com/scl/fi/wu97x7z89uv8843hbon4y/AllVideo_01788835643128.mp4?rlkey=wd6i3clpz6ylu98jo03wqj1y4&st=8cijeao1&dl=1",
+            "https://www.dropbox.com/scl/fi/0pk7nqxcmvpmxeeki0cbu/AllVideo_01788835709751.mp4?rlkey=zgzq0xqw1dsw2fqd7p448cwsd&st=f7scy5yu&dl=1",
+            "https://www.dropbox.com/scl/fi/0oiu92ju44ara83kl4qpn/AllVideo_01788835891232.mp4?rlkey=nneluny30sk0okvx1omoxnovj&st=k3yyiz3c&dl=1",
+            "https://www.dropbox.com/scl/fi/oxe5l0etyf8phuqkf8lbx/AllVideo_01788835607228.mp4?rlkey=o92gachxt62kd37d93xbybypt&st=bd34tgvv&dl=1",
+            "https://www.dropbox.com/scl/fi/8y6hik40nq02pojxdrtqb/AllVideo_01788835566312.mp4?rlkey=442vrd7ritzkqb7vxcop1hcuq&st=p3m3fd40&dl=1",
+            "https://www.dropbox.com/scl/fi/e98q0zk1yvme3litjfed6/AllVideo_01788835497584.mp4?rlkey=4dfs2pp6phv7nqaenj2e7wjus&st=l0lfljt4&dl=1",
+            "https://www.dropbox.com/scl/fi/64s55gkecxjsapbsesmvc/AllVideo_01788835527315.mp4?rlkey=146lz84n68w5yqc2t89fxxfz7&st=1yb9ow4l&dl=1",
+            "https://www.dropbox.com/scl/fi/vi02k4izdvoexyhkh9ut6/AllVideo_01788835457592.mp4?rlkey=j4q77wmtpnsfj8n0dvf003wad&st=r4q6xi73&dl=1",
+            "https://www.dropbox.com/scl/fi/a8cjkotp57m4y8kydi2vp/AllVideo_01788835395680.mp4?rlkey=n0qpxtui94ak77eohs5iobco9&st=6iv36fd9&dl=1",
+            "https://www.dropbox.com/scl/fi/jb961sjqmt9vp9nd44d6u/AllVideo_01788835353428.mp4?rlkey=pb6e3hjmpexsy0bflxq346ttf&st=kruftt8n&dl=1",
+            "https://www.dropbox.com/scl/fi/6ttw3iekx0gv6n6wab2fv/AllVideo_01788835292594.mp4?rlkey=bgretl6ttatpkh9d6k294hzqh&st=vqwn72q2&dl=1",
+            "https://www.dropbox.com/scl/fi/415g2axe5uuh2xhmpqrmy/AllVideo_01788834799264.mp4?rlkey=ej5l5naf59op2nyi3dyzabu1h&st=842ccb7y&dl=1",
+            "https://www.dropbox.com/scl/fi/sxzoan6vzlu4lkobijy90/AllVideo_01788835248002.mp4?rlkey=z99b30p1p4k5fh0z1pana4khs&st=5ywbtf5w&dl=1",
+            "https://www.dropbox.com/scl/fi/6cnd6vkhzodob0331x513/AllVideo_01788897162440.mp4?rlkey=ppk1d4nau2qzy0xl2tw43ug1q&st=fyf1p8iy&dl=1",
+            "https://www.dropbox.com/scl/fi/1ujni6sd51bzsy0mkrg76/AllVideo_01788834346635.mp4?rlkey=o1ww0hg4qrzkkbcirt6cbzgco&st=vpn7yy00&dl=1",
+            "https://www.dropbox.com/scl/fi/0yyp090rqryngzve5o6af/AllVideo_01788834079298.mp4?rlkey=9cd2b5chhqxztwvla9jqluvwn&st=906tzqu0&dl=1",
+            "https://www.dropbox.com/scl/fi/ghtyx6a0xfzjnrw3t5cj4/AllVideo_01788833967671.mp4?rlkey=ixr22b3hp6tpfajq2jd5b2s1g&st=g2vyhew1&dl=1",
+            "https://www.dropbox.com/scl/fi/pt9heb9y7gxj4fk3qvm4r/AllVideo_01788833859904.mp4?rlkey=iwu8te64licgitsyqs9cqnkom&st=ev0c45em&dl=1",
+            "https://www.dropbox.com/scl/fi/4p2nr5hgpmgs9gjq9yfgi/AllVideo_01789090435327.mp4?rlkey=zusqiix44ann0woileuw6yuqm&st=4p5zyhlc&dl=1",
+            "https://www.dropbox.com/scl/fi/ho3eyth24js1ngbolkdfm/AllVideo_01789090484116.mp4?rlkey=h00vwgwwq3hnv873gn0s5pdr0&st=yhta2nc5&dl=1",
+            "https://www.dropbox.com/scl/fi/97o0gymfkvo2zdm1b0a50/AllVideo_01789090508568.mp4?rlkey=5wx1ndta1x3yf0gmagqb17jwb&st=dt5z1e2i&dl=1",
+            "https://www.dropbox.com/scl/fi/eyxits5t264saffia1mij/AllVideo_01789090573640.mp4?rlkey=wcv6aookbtk0bdljlg1tbmtvi&st=yv07ipk4&dl=1",
+            "https://www.dropbox.com/scl/fi/yb09d4l7khq1lnyk1ec71/AllVideo_01789090601032.mp4?rlkey=oh4tna6d5dzwi3btx2o6h82oj&st=pllsrjy6&dl=1",
+            "https://www.dropbox.com/scl/fi/p7rb1hxdq9j5fn4d9geek/AllVideo_01789090628506.mp4?rlkey=apwddhe57p8p0cgpxterks6gk&st=u5bpwtvt&dl=1",
+            "https://www.dropbox.com/scl/fi/iz966rigti840yprxmmmu/AllVideo_01789090655442.mp4?rlkey=dorhw4os2mj44xh6658qar3t4&st=xxah90kw&dl=1",
+            "https://www.dropbox.com/scl/fi/an4wnm2iaxvk0mjvyylj6/AllVideo_01789090537079.mp4?rlkey=srvy527y9f14epcvkcvee3k4s&st=61nvdsel&dl=1",
+            "https://www.dropbox.com/scl/fi/lui0gbjswykyqa6rdqp1w/AllVideo_01789090685636.mp4?rlkey=2wz12w1lofnxb681obt8m5o67&st=mhhwfzqo&dl=1",
+            "https://www.dropbox.com/scl/fi/go2g9oqrrsg0b2d8xcre5/AllVideo_01789090718233.mp4?rlkey=k7s5yze8vwewrgu9tbioizuge&st=yz882aub&dl=1",
+            "https://www.dropbox.com/scl/fi/923m5unx3aqn1qiv06r1d/AllVideo_01789090740887.mp4?rlkey=k2u4jp5d9e9wkkcelvichfy35&st=ozt9m0c2&dl=1",
+            "https://www.dropbox.com/scl/fi/4tm5lu909h1qac71meih9/AllVideo_01789426081752.mp4?rlkey=z8k7p2scm8dte1xihjpj6r4od&st=y38vbstz&dl=1",
+            "https://www.dropbox.com/scl/fi/nedm0vmy068xby4lvwnzr/AllVideo_01789426008935.mp4?rlkey=3kfr8rp0xbrhei6jnpxnkj3az&st=qqgy4mgm&dl=1",
+            "https://www.dropbox.com/scl/fi/p77whgrkwl38urlkivxng/AllVideo_01789425939976.mp4?rlkey=2xls667hgiutxn9u6dbb7vw0z&st=4s78028t&dl=1",
+            "https://www.dropbox.com/scl/fi/41g9j834nzhi2yduzn65u/AllVideo_01789425879172.mp4?rlkey=7y99ixb0m25xz1n4iedfk4fsu&st=puunwxdb&dl=1",
+            "https://www.dropbox.com/scl/fi/pmzf3bzew1zs7llsy5k9b/AllVideo_01789425801104.mp4?rlkey=sca94k9trp0ls3rxirypvdi55&st=y8ycqgpd&dl=1",
+            "https://www.dropbox.com/scl/fi/493zd51qkvpp07lynxxbx/AllVideo_01789428990321.mp4?rlkey=vt1yos5ubo3eprxqbh5hnvf7t&st=d79hg3r0&dl=1",
+            "https://www.dropbox.com/scl/fi/6zq4kc0mc9fnycxbocw18/AllVideo_01789429194923.mp4?rlkey=2i2dyvpvsssrnpikekg1e6r5d&st=gy7hen6p&dl=1",
+            "https://www.dropbox.com/scl/fi/52k8s9i8uca3u954710vz/AllVideo_01789429246373.mp4?rlkey=vxey9xmpdqhagwzcjwt9mcpcf&st=4odavmcn&dl=1",
+            "https://www.dropbox.com/scl/fi/96802xiardi8ve5raoqlf/AllVideo_01789429290826.mp4?rlkey=mr5mfrl1w00jznkaklnfmjl80&st=w33ek5ap&dl=1",
+            "https://www.dropbox.com/scl/fi/6sqvy3ieww6oeyj3vu3op/AllVideo_01789429488466.mp4?rlkey=los38igvfelsqlrom3adje6iz&st=2zh0itc8&dl=1",
+            "https://www.dropbox.com/scl/fi/zwm9v8ebsq4hapowwy0we/AllVideo_01789429636026.mp4?rlkey=jbzjsy0mq6gfb8b050w2pxbb0&st=9z1khib0&dl=1",
+            "https://www.dropbox.com/scl/fi/s9kow3j84lt02xhzkiliw/AllVideo_01789429726134.mp4?rlkey=8x1kskzk9bdxd6390t62cw9b4&st=jse7vtbv&dl=1",
+            "https://www.dropbox.com/scl/fi/hgqdjhm4gv62rek7vv96w/AllVideo_01789429782353.mp4?rlkey=qeo9y47xxiicoednqn1ltgo0b&st=p51a2txh&dl=1",
+            "https://www.dropbox.com/scl/fi/zb2zld43y0znaklwbe4fi/AllVideo_01789438740287.mp4?rlkey=lrgd7m2fipdnr62p4djyktnpj&st=7yeoqn36&dl=1",
+            "https://www.dropbox.com/scl/fi/bkr9t9sy1tqrndqq5zbe2/AllVideo_01789438813334.mp4?rlkey=yyi4do32br4sxvafhfa1mlfy4&st=5hih6w1d&dl=1",
+            "https://www.dropbox.com/scl/fi/qecbyll8v7tna3basgzt7/AllVideo_01789479177196.mp4?rlkey=iyjzrk2bh25m908sffmboh8e0&st=dwn0g4mj&dl=1",
+            "https://www.dropbox.com/scl/fi/tw0i6f681re2e910oju0b/AllVideo_01789479281501.mp4?rlkey=1yl7re2o6zrl8sqr4jgx1c8ln&st=wxi8nk4l&dl=1",
+            "https://www.dropbox.com/scl/fi/l4lwsarp74rexb75astfl/AllVideo_01789479307462.mp4?rlkey=xfklbfz07qncc8bs8lpa1erd7&st=wwcmygmq&dl=1",
+            "https://www.dropbox.com/scl/fi/15xlfe2vtuqrwk42qdsnh/AllVideo_01789479362119.mp4?rlkey=fkak2djzb0bobc3k3mri9441m&st=zbo54x5u&dl=1",
+            "https://www.dropbox.com/scl/fi/f8dpvqxebwck7yc96ikcj/AllVideo_01789479656464.mp4?rlkey=tm4tuvqxyyvo0qks8ls22u550&st=wjngjj8f&dl=1",
+            "https://www.dropbox.com/scl/fi/wnf2x2r99ubmuowoei3ni/AllVideo_01789480088133.mp4?rlkey=ny59tc0snl187g1u67wfjaq6i&st=cocv3fzu&dl=1",
+            "https://www.dropbox.com/scl/fi/zab9viophhh9bri0ua5hg/AllVideo_01789484118092.mp4?rlkey=1bknnv0hdupofsv1d7tbqvq3x&st=s612kfri&dl=1",
+            "https://www.dropbox.com/scl/fi/3ts1opegxggihis6od4v9/AllVideo_01789483879289.mp4?rlkey=huk6fy7tphelo0npl8mgiis3z&st=56xsvw7n&dl=1",
+            "https://www.dropbox.com/scl/fi/nw3jomomofux05p1kgfqc/AllVideo_01789483853257.mp4?rlkey=rxwa5rxim9e925oxf2jj1wav2&st=bburewil&dl=1",
+            "https://www.dropbox.com/scl/fi/6mbu9bss3mug33tccfj0l/AllVideo_01789483820480.mp4?rlkey=c87s4x8jyd5s3w99lixtr2fnq&st=iak6xqos&dl=1",
+            "https://www.dropbox.com/scl/fi/yoell2pupf2yyzdd8x5h1/AllVideo_01789483779294.mp4?rlkey=b4mxjife0rpvp5gq7mubkkitr&st=yy6pzblo&dl=1",
+            "https://www.dropbox.com/scl/fi/nx17zp737ie2jsln0yxx3/AllVideo_01789483746668.mp4?rlkey=xergx8ltub51zm1bi02aqq9fi&st=80v2l5zg&dl=1",
+            "https://www.dropbox.com/scl/fi/f5h72zp42hwo6zvgvo3vq/AllVideo_01789483676000.mp4?rlkey=b1ghuo60079q5z5985n9ysbgv&st=80aa4h77&dl=1",
+            "https://www.dropbox.com/scl/fi/1fu7err8u99gritrabsrv/AllVideo_01789483573707.mp4?rlkey=snrp5asheskxuon7acdthez50&st=fevj5lqk&dl=1",
+            "https://www.dropbox.com/scl/fi/in4v952xcjzz3wr58z1nw/AllVideo_01789483515961.mp4?rlkey=v2ht98ggbhv8qekm7g0o2xqte&st=yuc11pi7&dl=1",
+            "https://www.dropbox.com/scl/fi/ywdos6fwcrh6s4lyjgaua/AllVideo_01789483461735.mp4?rlkey=cbxbvxkdwd19n677sezai42y8&st=nmmg65fi&dl=1",
+            "https://www.dropbox.com/scl/fi/fzzw97zkytgcpc2ejm8tr/AllVideo_01789483379364.mp4?rlkey=jyuk9cnu6ogrmit3g68090y3v&st=t0ke5yp0&dl=1",
+            "https://www.dropbox.com/scl/fi/4onj1p21wz9wm0dlweek5/AllVideo_01789483297729.mp4?rlkey=pjh47n9692i5ggh5p6pdpzzoz&st=q24ltku3&dl=1",
+            "https://www.dropbox.com/scl/fi/oql36bqstoylvfqc4ln56/AllVideo_01789515457052.mp4?rlkey=k91by50bw9hjyjze2ors2ee46&st=xlb9qim7&dl=1",
+            "https://www.dropbox.com/scl/fi/4d2k2k663xppizx1acnom/AllVideo_01789515409037.mp4?rlkey=zfpeppx4zl87ksha5lw0nnq4v&st=1dnye9a2&dl=1",
+            "https://www.dropbox.com/scl/fi/r4azreuoz4m2t82kkewgk/AllVideo_01789515285551.mp4?rlkey=mbzmdqs2brhkrsm4z6e84nrju&st=jhqvv9sk&dl=1",
+            "https://www.dropbox.com/scl/fi/tihnj4aumjvew8xu0tkk5/AllVideo_01789515253246.mp4?rlkey=lyv9ml88e91efaautjbfjx1wk&st=ve0qkv4v&dl=1",
+            "https://www.dropbox.com/scl/fi/3tm34x8r4t6x3xdixiski/AllVideo_01789515165425.mp4?rlkey=3lbtohzlycouun5acgw9ku1la&st=y758p1wd&dl=1",
+            "https://www.dropbox.com/scl/fi/erj0tc1dib01utvx07bko/AllVideo_01789515115567.mp4?rlkey=qry6466wef5kt5vqfibxn00y7&st=29hg0c28&dl=1",
+            "https://www.dropbox.com/scl/fi/myz14qsjmnda3zuru573o/AllVideo_01789515094558.mp4?rlkey=hxz8tjji92qiz06ise6cmspvr&st=ak3lag3t&dl=1",
+            "https://www.dropbox.com/scl/fi/4196jhj6ersophq3blwwb/AllVideo_01789515064975.mp4?rlkey=93u8l7v5zgp3oi1ilkkpa1l5r&st=ynnklt8h&dl=1",
+            "https://www.dropbox.com/scl/fi/fgbuw88q46dbaidhbvn9e/AllVideo_01789515031679.mp4?rlkey=bi657wzjkn1yr4ywfkatc1kkd&st=x3g824ws&dl=1",
+            "https://www.dropbox.com/scl/fi/zywqdwyg5cbvuvxhc6vs0/AllVideo_01789514996340.mp4?rlkey=7ms8i4lwsir5tu6zwi2q47q9x&st=pe11l1o2&dl=1",
+            "https://www.dropbox.com/scl/fi/k7ytuqx03a24bnb2hxmpp/AllVideo_01789514955591.mp4?rlkey=q2x9b6ogxyvz5qnj02zs5s9ls&st=rroyd6v3&dl=1",
+            "https://www.dropbox.com/scl/fi/jpkvwiw0waul0aw7tosvq/AllVideo_01789514925478.mp4?rlkey=k0va99iw846ng0x6hnj03qmnj&st=rpdgw6b2&dl=1",
+            "https://www.dropbox.com/scl/fi/kv64kz1mumvahb9p4pvwr/AllVideo_01789514361626.mp4?rlkey=6c90fj2klfznlhc4izcu5igqx&st=73c77o4g&dl=1",
+            "https://www.dropbox.com/scl/fi/yl7qmvqfjg3fwqwbirfh5/AllVideo_01789514253094.mp4?rlkey=15ynnap1alsa6ie2krcv359cv&st=uhuhk02z&dl=1",
+            "https://www.dropbox.com/scl/fi/90t8hkdnq5o5jmf4g3znv/AllVideo_01789514221760.mp4?rlkey=q4vadj7b93jp0lxn14p4hlkfz&st=1x3ojhu5&dl=1"
+        ];
+
+        const playlist = rawUrls.map((url, i) => ({
+            id: `dropbox_video_${i + 1}`,
+            title: `🎬 Video Especial ${i + 1}`,
+            url: getDirectDropboxUrl(url)
+        }));
+
+        let db;
+        let observer;
+        let userHasInteracted = false;
+        const objectUrls = new Map();
+        let cachedSaveImgUrl = "";
+
+        function setVideoBlobSource(videoElement, blob, key) {
+            if (objectUrls.has(key)) URL.revokeObjectURL(objectUrls.get(key));
+            const newUrl = URL.createObjectURL(blob);
+            objectUrls.set(key, newUrl);
+            videoElement.src = newUrl + "#t=0.1";
+        }
+
+        function unlockAudio() {
+            if (!userHasInteracted) {
+                userHasInteracted = true;
+                document.querySelectorAll("video").forEach(v => { v.muted = false; });
+                window.removeEventListener('touchstart', unlockAudio);
+                window.removeEventListener('click', unlockAudio);
+            }
+        }
+
+        window.addEventListener('touchstart', unlockAudio, { passive: true });
+        window.addEventListener('click', unlockAudio, { passive: true });
+
+        const request = indexedDB.open("KidsTubeFuturisticDB", 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("videos")) db.createObjectStore("videos");
+        };
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            cacheAppImages();
+            renderApp();
+            initAutoPlayOnScroll();
+        };
+
+        function cacheAppImages() {
+            const logoImg = document.getElementById("app-logo");
+            const backImg = document.getElementById("img-btn-back");
+            const bannerImg = document.getElementById("modal-banner");
+
+            const checkAndCache = (dbKey, remoteUrl, targetElement) => {
+                const tx = db.transaction(["videos"], "readonly");
+                const store = tx.objectStore("videos");
+                const getRequest = store.get(dbKey);
+
+                getRequest.onsuccess = () => {
+                    if (getRequest.result) {
+                        const blobUrl = URL.createObjectURL(getRequest.result);
+                        if (targetElement) targetElement.src = blobUrl;
+                        if (dbKey === "app_save_image") cachedSaveImgUrl = blobUrl;
+                    } else {
+                        const directUrl = getDirectDropboxUrl(remoteUrl);
+                        if (targetElement) targetElement.src = directUrl;
+                        fetch(directUrl)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const saveTx = db.transaction(["videos"], "readwrite");
+                                saveTx.objectStore("videos").put(blob, dbKey);
+                                saveTx.oncomplete = () => {
+                                    const blobUrl = URL.createObjectURL(blob);
+                                    if (targetElement) targetElement.src = blobUrl;
+                                    if (dbKey === "app_save_image") cachedSaveImgUrl = blobUrl;
+                                };
+                            }).catch(() => {});
+                    }
+                };
+            };
+
+            checkAndCache("app_logo_image", LOGO_URL, logoImg);
+            checkAndCache("app_back_image", BACK_IMG_URL, backImg);
+            checkAndCache("app_save_image", SAVE_IMG_URL, null);
+            checkAndCache("app_logo_image", LOGO_URL, bannerImg);
+        }
+
+        function renderApp() {
+            const container = document.getElementById("video-list");
+            container.innerHTML = "";
+
+            playlist.forEach((item, index) => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="video-wrapper">
+                        <video id="player-${item.id}" controls playsinline preload="metadata" onplay="handleVideoPlay(this)" onended="handleVideoEnd(this, ${index})"></video>
+                    </div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="status-badge status-online" id="status-${item.id}">
+                        <span class="led-dot"></span> <span class="badge-text">STREAM ONLINE</span>
+                    </div>
+                    <button class="btn-neu btn-download" id="btn-${item.id}" onclick="toggleDownload('${item.id}', '${item.url}')">
+                        <img src="${cachedSaveImgUrl || getDirectDropboxUrl(SAVE_IMG_URL)}" alt="Guardar" draggable="false">
+                    </button>
+                `;
+                container.appendChild(card);
+                checkVideoStatus(item.id, item.url);
+            });
+        }
+
+        function initAutoPlayOnScroll() {
+            observer = new IntersectionObserver((entries) => {
+                const container = document.getElementById("video-list");
+                if (!container.classList.contains("single-column")) return;
+
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector("video");
+                    if (entry.isIntersecting && video) {
+                        video.muted = !userHasInteracted;
+                        video.play().catch(() => {});
+                    } else if (video) {
+                        video.pause();
+                    }
+                });
+            }, { rootMargin: '-20% 0px -20% 0px', threshold: 0.6 });
+
+            setTimeout(() => {
+                document.querySelectorAll(".card").forEach(card => observer.observe(card));
+            }, 300);
+        }
+
+        function handleVideoPlay(currentVideo) {
+            unlockAudio();
+            const container = document.getElementById("video-list");
+            const btnBack = document.getElementById("btn-back");
+
+            document.querySelectorAll("video").forEach(v => { if (v !== currentVideo) v.pause(); });
+
+            const isFirst = !container.classList.contains("single-column");
+            container.classList.add("single-column");
+            btnBack.classList.add("visible");
+
+            if (isFirst) {
+                setTimeout(() => { currentVideo.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
+            }
+        }
+
+        function handleVideoEnd(video, currentIndex) {
+            video.currentTime = 0;
+            video.pause();
+            const nextIndex = currentIndex + 1;
+            if (nextIndex < playlist.length) {
+                const nextPlayer = document.getElementById(`player-${playlist[nextIndex].id}`);
+                if (nextPlayer) {
+                    nextPlayer.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    nextPlayer.muted = false;
+                    nextPlayer.play().catch(() => {});
+                }
+            } else resetLayout();
+        }
+
+        function resetLayout() {
+            const container = document.getElementById("video-list");
+            const btnBack = document.getElementById("btn-back");
+            document.querySelectorAll("video").forEach(v => { v.pause(); v.currentTime = 0; });
+            container.classList.remove("single-column");
+            btnBack.classList.remove("visible");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkVideoStatus(id, remoteUrl) {
+            const tx = db.transaction(["videos"], "readonly");
+            const store = tx.objectStore("videos");
+            const req = store.get(id);
+
+            req.onsuccess = () => {
+                const player = document.getElementById(`player-${id}`);
+                const btn = document.getElementById(`btn-${id}`);
+                const status = document.getElementById(`status-${id}`);
+
+                if (req.result) {
+                    setVideoBlobSource(player, new Blob([req.result], { type: 'video/mp4' }), id);
+                    player.load();
+                    status.innerHTML = `<span class="led-dot"></span> <span class="badge-text">LOCAL OFFLINE</span>`;
+                    status.className = "status-badge status-offline";
+                    btn.style.display = "none";
+                } else {
+                    player.src = getDirectDropboxUrl(remoteUrl) + "#t=0.1";
+                    status.innerHTML = `<span class="led-dot"></span> <span class="badge-text">STREAM ONLINE</span>`;
+                    status.className = "status-badge status-online";
+                    btn.style.display = "flex";
+                    btn.innerHTML = `<img src="${cachedSaveImgUrl || getDirectDropboxUrl(SAVE_IMG_URL)}" alt="Guardar" draggable="false">`;
+                    btn.className = "btn-neu btn-download";
+                }
+            };
+        }
+
+        function toggleDownload(id, url) {
+            const btn = document.getElementById(`btn-${id}`);
+            const status = document.getElementById(`status-${id}`);
+            const tx = db.transaction(["videos"], "readonly");
+            const req = tx.objectStore("videos").get(id);
+
+            req.onsuccess = () => {
+                if (req.result) {
+                    const delTx = db.transaction(["videos"], "readwrite");
+                    delTx.objectStore("videos").delete(id);
+                    delTx.oncomplete = () => {
+                        if (objectUrls.has(id)) URL.revokeObjectURL(objectUrls.get(id));
+                        checkVideoStatus(id, url);
+                    };
+                } else {
+                    btn.disabled = true;
+                    status.className = "status-badge status-loading";
+                    status.innerHTML = `<span class="led-dot"></span> <span class="badge-text">DESCARGANDO...</span>`;
+                    
+                    btn.innerHTML = `
+                        <div class="btn-download-bar-container">
+                            <div class="btn-download-bar-fill" id="bar-fill-${id}"></div>
+                        </div>
+                    `;
+
+                    let downloadUrl = getDirectDropboxUrl(url).replace("dl=1", "raw=1");
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", downloadUrl, true);
+                    xhr.responseType = "blob";
+
+                    xhr.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            const fillElem = document.getElementById(`bar-fill-${id}`);
+                            if (fillElem) fillElem.style.width = percent + "%";
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            const blob = xhr.response;
+                            const saveTx = db.transaction(["videos"], "readwrite");
+                            saveTx.objectStore("videos").put(new Blob([blob], { type: 'video/mp4' }), id);
+                            saveTx.oncomplete = () => {
+                                btn.disabled = false;
+                                checkVideoStatus(id, url);
+                            };
+                        } else {
+                            alert("No se pudo guardar offline debido a restricciones del servidor (Error 403/CORS). El video continuará disponible en streaming.");
+                            btn.disabled = false;
+                            checkVideoStatus(id, url);
+                        }
+                    };
+
+                    xhr.onerror = () => {
+                        alert("Ocurrió un error al intentar descargar el video.");
+                        btn.disabled = false;
+                        checkVideoStatus(id, url);
+                    };
+
+                    xhr.send();
+                }
+            };
+        }
+    </script>
+</body>
+</html>
